@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <Import Project="$(MSBuildThisFileDirectory)../../../../packages/Microsoft.Windows.CppWinRT.2.0.240111.5/build/native/Microsoft.Windows.CppWinRT.targets" Condition="Exists('$(MSBuildThisFileDirectory)../../../../packages/Microsoft.Windows.CppWinRT.2.0.240111.5/build/native/Microsoft.Windows.CppWinRT.targets')" />
+</Project>

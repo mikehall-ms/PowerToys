@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <!-- Mirror spdlog + CppWinRT imports from MousePointerCrosshairs -->
+  <Import Project="$(MSBuildThisFileDirectory)../../../../deps/spdlog.props" />
+  <Import Project="$(MSBuildThisFileDirectory)../../../../packages/Microsoft.Windows.CppWinRT.2.0.240111.5/build/native/Microsoft.Windows.CppWinRT.props" Condition="Exists('$(MSBuildThisFileDirectory)../../../../packages/Microsoft.Windows.CppWinRT.2.0.240111.5/build/native/Microsoft.Windows.CppWinRT.props')" />
+
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <PreprocessorDefinitions>_MSVC_COROUTINE_ABI=1;_COROUTINE_ABI=1;_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING;_SILENCE_ALL_MS_EXT_DEPRECATION_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <AdditionalOptions>/await %(AdditionalOptions)</AdditionalOptions>
+      <!-- Ensure correct include roots even when SolutionDir is not defined (e.g., standalone msbuild) -->
+      <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)..\..\..\;$(MSBuildThisFileDirectory)..\..\..\modules;$(MSBuildThisFileDirectory)..\..\..\common\Telemetry;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+
+  <!-- Ensure local shim for Trace is compiled into the UI so InclusiveCrosshairs.cpp resolves symbols -->
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)trace_shim.cpp" />
+  </ItemGroup>
+</Project>

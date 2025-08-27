@@ -108,7 +108,7 @@ namespace CommonSharedConstants
     const wchar_t PDF_PREVIEW_RESIZE_EVENT[] = L"Local\\PowerToysPdfPreviewResizeEvent-5a2f162a-f728-45fe-8bda-ef3d5e434ce7";
 
     // Path to the event used by MarkdownPreviewHandler
-    const wchar_t SVG_PREVIEW_RESIZE_EVENT[] = L"Local\\PowerToysSvgPreviewResizeEvent-0701a4fc-d5a1-4ee7-b885-f83982c62a0d";
+    const wchar_t SVG_PREVIEW_RESIZE_EVENT[] = L"Local\\PowerToysSvgPreviewResizeEvent-0701a4fc-d5a1-4ee7-b885-f83982c62a0";
 
     // Path to the event used to show Peek
     const wchar_t SHOW_PEEK_SHARED_EVENT[] = L"Local\\ShowPeekEvent";
@@ -137,4 +137,10 @@ namespace CommonSharedConstants
 
     // Max DWORD for key code to disable keys.
     const DWORD VK_DISABLED = 0x100;
+
+    // Mouse Pointer Crosshairs + Gliding Cursor shared events
+    const wchar_t SHOW_MOUSE_CROSSHAIRS_SHARED_EVENT[] = L"Local\\ShowMousePointerCrosshairsEvent-7f8d3c2a-5b61-4d0e-8a5f-2c9e7f0b3d12";
+    const wchar_t GLIDING_CURSOR_HOTKEY_SHARED_EVENT[] = L"Local\\MousePointerCrosshairs-GlidingHotkeyEvent-3c4d5e6f-7081-42a3-b4c5-d6e7f8090a1b";
+    const wchar_t TERMINATE_MOUSE_CROSSHAIRS_SHARED_EVENT[] = L"Local\\TerminateMousePointerCrosshairsEvent-e1f2a3b4-c5d6-4789-8e0f-1234567890ab";
+    const wchar_t MOUSE_CROSSHAIRS_SEND_SETTINGS_TELEMETRY_EVENT[] = L"Local\\MousePointerCrosshairsSettingsTelemetryEvent-9a1bc2d3-4e5f-4678-9abc-def012345678";
 }

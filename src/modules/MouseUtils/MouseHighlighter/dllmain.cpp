@@ -213,47 +213,57 @@ public:
             {
                 Logger::warn("Failed to initialize Mouse Highlighter activation shortcut");
             }
+
             // Migration from <=1.1
-            auto version = (std::wstring)settingsObject.GetNamedString(L"version");
-            auto migration = false;
+            bool migration = false;
             uint8_t opacity = 166;
-            if (version == L"1.0" || version == L"1.1")
+            try
             {
-                migration = true;
-                try
+                auto version = (std::wstring)settingsObject.GetNamedString(L"version");
+                if (version == L"1.0" || version == L"1.1")
                 {
-                    // Parse Opacity
-                    auto jsonPropertiesObject = settingsObject.GetNamedObject(JSON_KEY_PROPERTIES).GetNamedObject(JSON_KEY_HIGHLIGHT_OPACITY);
-                    int value = static_cast<int>(jsonPropertiesObject.GetNamedNumber(JSON_KEY_VALUE));
-                    if (value >= 0)
+                    migration = true;
+                    try
                     {
-                        if (version == L"1.0")
+                        // Parse Opacity
+                        auto jsonPropertiesObject = settingsObject.GetNamedObject(JSON_KEY_PROPERTIES).GetNamedObject(JSON_KEY_HIGHLIGHT_OPACITY);
+                        int value = static_cast<int>(jsonPropertiesObject.GetNamedNumber(JSON_KEY_VALUE));
+                        if (value >= 0)
                         {
-                            opacity = value;
+                            if (version == L"1.0")
+                            {
+                                opacity = static_cast<uint8_t>(value);
+                            }
+                            else
+                            {
+                                // 1.1
+                                opacity = static_cast<uint8_t>(value * 255 / 100);
+                            }
                         }
                         else
                         {
-                            // 1.1
-                            opacity = value * 255 / 100;
+                            throw std::runtime_error("Invalid Opacity value");
                         }
                     }
-                    else
+                    catch (...)
                     {
-                        throw std::runtime_error("Invalid Opacity value");
+                        Logger::warn("Failed to initialize Opacity from settings. Will use default value");
                     }
                 }
-                catch (...)
-                {
-                    Logger::warn("Failed to initialize Opacity from settings. Will use default value");
-                }
             }
+            catch (...)
+            {
+                // Missing or invalid version; assume current schema (no migration) and keep default opacity
+                Logger::trace("Mouse Highlighter settings: 'version' missing, using defaults");
+            }
+
             try
             {
                 // Parse left button click color
                 auto jsonPropertiesObject = settingsObject.GetNamedObject(JSON_KEY_PROPERTIES).GetNamedObject(JSON_KEY_LEFT_BUTTON_CLICK_COLOR);
                 auto leftColor = (std::wstring)jsonPropertiesObject.GetNamedString(JSON_KEY_VALUE);
                 uint8_t a = opacity, r, g, b;
-                if (!migration && !checkValidARGB(leftColor, &a, &r, &g, &b) || migration && !checkValidRGB(leftColor, &r, &g, &b))
+                if ((!migration && !checkValidARGB(leftColor, &a, &r, &g, &b)) || (migration && !checkValidRGB(leftColor, &r, &g, &b)))
                 {
                     Logger::error("Left click color ARGB value is invalid. Will use default value");
                 }
@@ -272,7 +282,7 @@ public:
                 auto jsonPropertiesObject = settingsObject.GetNamedObject(JSON_KEY_PROPERTIES).GetNamedObject(JSON_KEY_RIGHT_BUTTON_CLICK_COLOR);
                 auto rightColor = (std::wstring)jsonPropertiesObject.GetNamedString(JSON_KEY_VALUE);
                 uint8_t a = opacity, r, g, b;
-                if (!migration && !checkValidARGB(rightColor, &a, &r, &g, &b) || migration && !checkValidRGB(rightColor, &r, &g, &b))
+                if ((!migration && !checkValidARGB(rightColor, &a, &r, &g, &b)) || (migration && !checkValidRGB(rightColor, &r, &g, &b)))
                 {
                     Logger::error("Right click color ARGB value is invalid. Will use default value");
                 }
@@ -361,8 +371,23 @@ public:
             try
             {
                 // Parse auto activate
-                auto jsonPropertiesObject = settingsObject.GetNamedObject(JSON_KEY_PROPERTIES).GetNamedObject(JSON_KEY_AUTO_ACTIVATE);
-                highlightSettings.autoActivate = jsonPropertiesObject.GetNamedBoolean(JSON_KEY_VALUE);
+                if (settingsObject.HasKey(JSON_KEY_PROPERTIES))
+                {
+                    auto props = settingsObject.GetNamedObject(JSON_KEY_PROPERTIES);
+                    if (props.HasKey(JSON_KEY_AUTO_ACTIVATE))
+                    {
+                        auto jsonPropertiesObject = props.GetNamedObject(JSON_KEY_AUTO_ACTIVATE);
+                        highlightSettings.autoActivate = jsonPropertiesObject.GetNamedBoolean(JSON_KEY_VALUE);
+                    }
+                    else
+                    {
+                        Logger::warn("Mouse Highlighter setting 'auto_activate' missing. Using default value");
+                    }
+                }
+                else
+                {
+                    Logger::warn("Mouse Highlighter settings: 'properties' missing. Using default values");
+                }
             }
             catch (...)
             {
@@ -371,8 +396,23 @@ public:
             try
             {
                 // Parse spotlight mode
-                auto jsonPropertiesObject = settingsObject.GetNamedObject(JSON_KEY_PROPERTIES).GetNamedObject(JSON_KEY_SPOTLIGHT_MODE);
-                highlightSettings.spotlightMode = jsonPropertiesObject.GetNamedBoolean(JSON_KEY_VALUE);
+                if (settingsObject.HasKey(JSON_KEY_PROPERTIES))
+                {
+                    auto props = settingsObject.GetNamedObject(JSON_KEY_PROPERTIES);
+                    if (props.HasKey(JSON_KEY_SPOTLIGHT_MODE))
+                    {
+                        auto jsonPropertiesObject = props.GetNamedObject(JSON_KEY_SPOTLIGHT_MODE);
+                        highlightSettings.spotlightMode = jsonPropertiesObject.GetNamedBoolean(JSON_KEY_VALUE);
+                    }
+                    else
+                    {
+                        Logger::warn("Mouse Highlighter setting 'spotlight_mode' missing. Using default value");
+                    }
+                }
+                else
+                {
+                    Logger::warn("Mouse Highlighter settings: 'properties' missing. Using default values");
+                }
             }
             catch (...)
             {
