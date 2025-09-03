@@ -5,6 +5,19 @@
 #include <cstdarg>
 #include <mutex>
 #include <process.h> // _beginthreadex
+#include "GlideMenu.h"
+
+// Helper to synthesize a mouse click at screen point
+static void SendMouseClickAt(POINT pt, DWORD downFlag, DWORD upFlag)
+{
+    SetCursorPos(pt.x, pt.y);
+    INPUT inputs[2]{};
+    inputs[0].type = INPUT_MOUSE;
+    inputs[0].mi.dwFlags = downFlag;
+    inputs[1].type = INPUT_MOUSE;
+    inputs[1].mi.dwFlags = upFlag;
+    SendInput(2, inputs, sizeof(INPUT));
+}
 
 // Enable/disable diagnostics
 // #define LOG_UI_DIAG 1
@@ -1227,6 +1240,81 @@ LRESULT CALLBACK Overlay::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM
             s_instance->LoadSettingsFromFile(true);
         }
         break;
+    case WM_TOGGLE_GLIDE:
+        UiLog(L"WM_TOGGLE_GLIDE received");
+        if (s_instance)
+        {
+            if (s_instance->m_glideStage == GlideStage::Menu && s_instance->m_menu)
+            {
+                UiLog(L"Menu open -> CommitSelection()");
+                s_instance->m_menu->CommitSelection();
+            }
+            else
+            {
+                UiLog(L"ToggleGlidingCursor()");
+                s_instance->ToggleGlidingCursor();
+            }
+        }
+        break;
+    case WM_GLIDE_MENU_ACTION:
+        UiLog(L"WM_GLIDE_MENU_ACTION received wParam=%lu lParam=0x%p", (unsigned long)wParam, (void*)lParam);
+        if (s_instance)
+        {
+            auto action = static_cast<GlideMenu::Action>(static_cast<UINT>(wParam));
+            POINT pt = s_instance->m_menuAnchor;
+            UiLog(L"Menu action at anchor [%ld,%ld]", pt.x, pt.y);
+            switch (action)
+            {
+            case GlideMenu::Action::LeftClick:
+                UiLog(L"LeftClick synthesizing");
+                SendMouseClickAt(pt, MOUSEEVENTF_LEFTDOWN, MOUSEEVENTF_LEFTUP);
+                break;
+            case GlideMenu::Action::RightClick:
+                UiLog(L"RightClick synthesizing");
+                SendMouseClickAt(pt, MOUSEEVENTF_RIGHTDOWN, MOUSEEVENTF_RIGHTUP);
+                break;
+            case GlideMenu::Action::DoubleClick:
+                UiLog(L"DoubleClick synthesizing");
+                SendMouseClickAt(pt, MOUSEEVENTF_LEFTDOWN, MOUSEEVENTF_LEFTUP);
+                SendMouseClickAt(pt, MOUSEEVENTF_LEFTDOWN, MOUSEEVENTF_LEFTUP);
+                break;
+            case GlideMenu::Action::Cancel:
+                UiLog(L"Cancel");
+                break;
+            }
+            if (s_instance->m_menu)
+            {
+                UiLog(L"Destroying menu window");
+                s_instance->m_menu->Destroy();
+                s_instance->m_menu.reset();
+            }
+            UiLog(L"StopGlide and re-enable tracking");
+            s_instance->StopGlide();
+            if (s_instance->m_drawing && !s_instance->m_mouseHook)
+            {
+                UiLog(L"Re-hooking LL mouse hook after menu");
+                s_instance->m_mouseHook = SetWindowsHookEx(WH_MOUSE_LL, [](int nCode, WPARAM wParam, LPARAM lParam)->LRESULT {
+                    if (nCode >= 0 && wParam == WM_MOUSEMOVE && Overlay::s_instance && !Overlay::s_instance->m_externalControl)
+                    {
+                        PostMessage(Overlay::s_instance->m_hwnd, WM_REQUEST_UPDATE, 0, 0);
+                    }
+                    return CallNextHookEx(0, nCode, wParam, lParam);
+                }, s_instance->m_hinstance, 0);
+                UiLog(L"SetWindowsHookEx(after-menu) result=%p gle=%lu", s_instance->m_mouseHook, GetLastError());
+            }
+
+            // Restore overlay visibility if it was hidden for the menu
+            if (s_instance->m_overlayHiddenForMenu)
+            {
+                UiLog(L"Restoring overlay visibility after menu");
+                s_instance->m_overlayHiddenForMenu = false;
+                if (s_instance->m_drawing)
+                {
+                    ShowWindow(s_instance->m_hwnd, SW_SHOWNOACTIVATE);
+                }
+            }
+        }
+        break;
     case WM_DESTROY:
 #ifdef LOG_UI_DIAG
         UiLog(L"WM_DESTROY hwnd=%p", hWnd);
@@ -1302,12 +1390,39 @@ void Overlay::AdvanceGlideStage()
         break;
     case GlideStage::HorizontalSlow:
         m_glideStage = GlideStage::Menu;
-        // Stop timer and show placeholder menu
+        // Stop timer and show XAML menu at captured cursor position
         KillTimer(m_hwnd, GLIDE_TIMER_ID);
-        MessageBoxW(m_hwnd, L"Gliding cursor selection menu (placeholder)", L"Mouse Pointer Crosshairs", MB_OK | MB_TOPMOST);
-        // End gliding mode and turn off overlay
-        StopGlide();
-        StopDrawing();
+        // Use current gliding cursor position for menu placement
+        m_menuAnchor.x = m_glideX;
+        m_menuAnchor.y = m_glideY;
+        UiLog(L"AdvanceGlideStage -> Menu: anchor=[%ld,%ld] (glide pos)", m_menuAnchor.x, m_menuAnchor.y);
+        if (!m_menu)
+        {
+            m_menu = std::make_unique<GlideMenu>();
+        }
+        if (m_mouseHook)
+        {
+            UiLog(L"Unhooking LL mouse hook before showing menu");
+            UnhookWindowsHookEx(m_mouseHook);
+            m_mouseHook = nullptr;
+        }
+        if (!m_menu->Create(m_hwnd, m_hinstance, m_menuAnchor, m_hwnd))
+        {
+            UiLog(L"GlideMenu Create failed gle=%lu", GetLastError());
+        }
+        else
+        {
+            UiLog(L"GlideMenu Create success; Show() and hide overlay to avoid input conflicts");
+            // Hide overlay to ensure the menu receives input and is visible clearly
+            if (IsWindowVisible(m_hwnd))
+            {
+                ShowWindow(m_hwnd, SW_HIDE);
+                m_overlayHiddenForMenu = true;
+                UiLog(L"Overlay hidden for menu");
+            }
+            m_menu->Show();
+        }
+        // remain in Menu stage until committed/canceled
         break;
     default:
         break;

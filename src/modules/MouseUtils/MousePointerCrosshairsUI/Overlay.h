@@ -15,6 +15,8 @@ namespace ABI
 }
 #endif
 
+#include "GlideMenu.h"
+
 // Settings payload used internally when applying settings
 #pragma pack(push, 1)
 struct CrosshairsSettingsPayload
@@ -126,6 +128,11 @@ private:
     float m_glidePosY{ 0.f };
     DWORD m_lastGlideTickMs{ 0 };
 
+    // Menu integration
+    std::unique_ptr<GlideMenu> m_menu;
+    POINT m_menuAnchor{ 0, 0 };
+    bool m_overlayHiddenForMenu{ false };
+
 private:
     static constexpr auto m_className = L"MousePointerCrosshairsUIOverlay";
     static constexpr auto m_windowTitle = L"PowerToys Mouse Pointer Crosshairs UI";
@@ -137,6 +144,7 @@ private:
     static constexpr DWORD WM_RELOAD_SETTINGS = WM_APP + 5;
     static constexpr DWORD WM_TOGGLE_GLIDE = WM_APP + 6;
     static constexpr DWORD GLIDE_TIMER_ID = 201;
+    static constexpr DWORD WM_GLIDE_MENU_ACTION = WM_APP + 100;
 
     static Overlay* s_instance;
 
