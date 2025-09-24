@@ -282,6 +282,22 @@ namespace Microsoft.PowerToys.Settings.UI.Library
             }
         }
 
+        private bool magnifier; // defaulting to off
+
+        [JsonPropertyName("Magnifier")]
+        public bool Magnifier
+        {
+            get => magnifier;
+            set
+            {
+                if (magnifier != value)
+                {
+                    LogTelemetryEvent(value);
+                    magnifier = value;
+                }
+            }
+        }
+
         private bool powerAccent; // defaulting to off
 
         [JsonPropertyName("QuickAccent")]

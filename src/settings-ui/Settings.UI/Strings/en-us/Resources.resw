@@ -2590,6 +2590,39 @@ From there, simply click on one of the supported files in the File Explorer and 
     <value>Use a keyboard shortcut to highlight left and right mouse clicks.</value>
     <comment>Mouse as in the hardware peripheral.</comment>
   </data>
+  <!-- Magnifier Settings -->
+	<data name="MouseUtils_Magnifier/Header" xml:space="preserve">
+    <value>Magnifier</value>
+    <comment>Module name for Magnifier in mouse utilities</comment>
+  </data>
+	<data name="Magnifier_ShortDescription" xml:space="preserve">
+    <value>Magnify portions of the screen</value>
+    <comment>Short description for Magnifier shown in Dashboard</comment>
+  </data>
+  <data name="MouseUtils_Enable_Magnifier.Header" xml:space="preserve"> 
+    <value>Enable Magnifier</value> 
+	<comment>Magnifier enable toggle header</comment> 
+  </data>
+  <data name="MouseUtils_Enable_Magnifier.Description" xml:space="preserve"> 
+	  <value>Turn the Magnifier utility on or off.</value> 
+	  <comment>Description for Magnifier enable toggle</comment> 
+  </data>
+  <data name="MouseUtils_Magnifier_ActivationShortcut.Header" xml:space="preserve"> 
+	  <value>Activation shortcut</value> 
+	  <comment>Header for Magnifier activation shortcut editor</comment> 
+  </data>
+  <data name="MouseUtils_Magnifier_ActivationShortcut.Description" xml:space="preserve"> 
+	  <value>Customize the shortcut to toggle the Magnifier.</value> 
+	  <comment>Description for Magnifier activation shortcut editor</comment> 
+  </data>
+  <data name="MouseUtils_Magnifier_MagnificationLevel.Header" xml:space="preserve"> 
+	  <value>Magnification level</value> 
+	  <comment>Header for magnification level slider</comment> 
+  </data>
+  <data name="MouseUtils_Magnifier_MagnificationLevel.Description" xml:space="preserve"> 
+	  <value>Zoom factor applied to the captured area.</value> 
+	  <comment>Description for magnification level slider</comment> 
+  </data>
   <data name="Oobe_MouseUtils_MousePointerCrosshairs.Text" xml:space="preserve">
     <value>Mouse Pointer Crosshairs</value>
     <comment>Mouse as in the hardware peripheral.</comment>

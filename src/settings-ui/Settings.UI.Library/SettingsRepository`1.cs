@@ -5,6 +5,7 @@
 using System;
 using System.Threading;
 
+using ManagedCommon;
 using Microsoft.PowerToys.Settings.UI.Library.Interfaces;
 
 namespace Microsoft.PowerToys.Settings.UI.Library
@@ -70,8 +71,16 @@ namespace Microsoft.PowerToys.Settings.UI.Library
             {
                 if (settingsConfig == null)
                 {
-                    T settingsItem = new T();
-                    settingsConfig = _settingsUtils.GetSettingsOrDefault<T>(settingsItem.GetModuleName());
+                    try
+                    {
+                        T settingsItem = new T();
+                        var moduleName = settingsItem.GetModuleName();
+                        settingsConfig = _settingsUtils.GetSettingsOrDefault<T>(moduleName);
+                    }
+                    catch (Exception)
+                    {
+                        throw;
+                    }
                 }
 
                 return settingsConfig;

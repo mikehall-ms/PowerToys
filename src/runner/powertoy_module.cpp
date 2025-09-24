@@ -69,7 +69,6 @@ void PowertoyModule::update_hotkeys()
             hkmng.AddHotkey(hotkeys[i], pt_module->get_key(), static_cast<int>(i), pt_module->is_enabled());
 
             CentralizedKeyboardHook::SetHotkeyAction(pt_module->get_key(), hotkeys[i], [modulePtr, i] {
-                Logger::trace(L"{} hotkey is invoked from Centralized keyboard hook", modulePtr->get_key());
                 return modulePtr->on_hotkey(i);
             });
         }
@@ -88,7 +87,6 @@ void PowertoyModule::UpdateHotkeyEx()
         auto hotkey = container.value();
         auto modulePtr = pt_module.get();
         auto action = [modulePtr](WORD /*modifiersMask*/, WORD /*vkCode*/) {
-            Logger::trace(L"{} hotkey Ex is invoked from Centralized keyboard hook", modulePtr->get_key());
             modulePtr->OnHotkeyEx();
         };
 

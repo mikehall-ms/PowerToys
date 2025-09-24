@@ -60,6 +60,7 @@ namespace MouseUtils.UITests
             FindMyMouse,
             MousePointerCrosshairs,
             MouseJump,
+            Magnifier,
         }
 
         private static readonly Dictionary<MouseUtils, string> MouseUtilUINameMap = new()
@@ -68,6 +69,7 @@ namespace MouseUtils.UITests
             [MouseUtils.FindMyMouse] = @"Find My Mouse",
             [MouseUtils.MousePointerCrosshairs] = @"Mouse Pointer Crosshairs",
             [MouseUtils.MouseJump] = @"Mouse Jump",
+            [MouseUtils.Magnifier] = @"Magnifier",
         };
 
         private static readonly Dictionary<MouseUtils, string> MouseUtilUIToggleMap = new()
@@ -76,6 +78,7 @@ namespace MouseUtils.UITests
             [MouseUtils.FindMyMouse] = @"Enable Find My Mouse",
             [MouseUtils.MousePointerCrosshairs] = @"Enable Mouse Pointer Crosshairs",
             [MouseUtils.MouseJump] = @"Enable Mouse Jump",
+            [MouseUtils.Magnifier] = @"Enable Magnifier",
         };
 
         public static string GetMouseUtilUIName(MouseUtils element)

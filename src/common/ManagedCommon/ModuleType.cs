@@ -22,6 +22,7 @@ namespace ManagedCommon
         MouseHighlighter,
         MouseJump,
         MousePointerCrosshairs,
+        Magnifier,
         MouseWithoutBorders,
         NewPlus,
         Peek,

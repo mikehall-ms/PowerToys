@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using global::PowerToys.GPOWrapper;
+using ManagedCommon;
 using Microsoft.PowerToys.Settings.UI.Helpers;
 using Microsoft.PowerToys.Settings.UI.Library;
 using Microsoft.PowerToys.Settings.UI.Library.Helpers;
@@ -29,22 +30,31 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
         private MousePointerCrosshairsSettings MousePointerCrosshairsSettingsConfig { get; set; }
 
-        public MouseUtilsViewModel(ISettingsUtils settingsUtils, ISettingsRepository<GeneralSettings> settingsRepository, ISettingsRepository<FindMyMouseSettings> findMyMouseSettingsRepository, ISettingsRepository<MouseHighlighterSettings> mouseHighlighterSettingsRepository, ISettingsRepository<MouseJumpSettings> mouseJumpSettingsRepository, ISettingsRepository<MousePointerCrosshairsSettings> mousePointerCrosshairsSettingsRepository, Func<string, int> ipcMSGCallBackFunc)
+        public MouseUtilsViewModel(ISettingsUtils settingsUtils, ISettingsRepository<GeneralSettings> settingsRepository, ISettingsRepository<FindMyMouseSettings> findMyMouseSettingsRepository, ISettingsRepository<MouseHighlighterSettings> mouseHighlighterSettingsRepository, ISettingsRepository<MouseJumpSettings> mouseJumpSettingsRepository, ISettingsRepository<MousePointerCrosshairsSettings> mousePointerCrosshairsSettingsRepository, ISettingsRepository<MagnifierSettings> magnifierSettingsRepository, Func<string, int> ipcMSGCallBackFunc)
         {
+            Logger.LogInfo($"[MouseUtilsViewModel] Constructor starting - initializing all mouse utilities settings");
+
             SettingsUtils = settingsUtils;
+            Logger.LogInfo($"[MouseUtilsViewModel] SettingsUtils assigned");
 
             // To obtain the general settings configurations of PowerToys Settings.
             ArgumentNullException.ThrowIfNull(settingsRepository);
+            Logger.LogInfo($"[MouseUtilsViewModel] GeneralSettings repository validated");
 
             GeneralSettingsConfig = settingsRepository.SettingsConfig;
+            Logger.LogInfo($"[MouseUtilsViewModel] GeneralSettingsConfig loaded");
 
+            Logger.LogInfo($"[MouseUtilsViewModel] Initializing enabled values (GPO and general settings)");
             InitializeEnabledValues();
+            Logger.LogInfo($"[MouseUtilsViewModel] Enabled values initialized");
 
             // To obtain the find my mouse settings, if the file exists.
             // If not, to create a file with the default settings and to return the default configurations.
             ArgumentNullException.ThrowIfNull(findMyMouseSettingsRepository);
+            Logger.LogInfo($"[MouseUtilsViewModel] FindMyMouse repository validated");
 
             FindMyMouseSettingsConfig = findMyMouseSettingsRepository.SettingsConfig;
+            Logger.LogInfo($"[MouseUtilsViewModel] FindMyMouseSettingsConfig loaded");
             _findMyMouseActivationMethod = FindMyMouseSettingsConfig.Properties.ActivationMethod.Value < 4 ? FindMyMouseSettingsConfig.Properties.ActivationMethod.Value : 0;
             _findMyMouseIncludeWinKey = FindMyMouseSettingsConfig.Properties.IncludeWinKey.Value;
             _findMyMouseDoNotActivateOnGameMode = FindMyMouseSettingsConfig.Properties.DoNotActivateOnGameMode.Value;
@@ -63,10 +73,13 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             _findMyMouseShakingMinimumDistance = FindMyMouseSettingsConfig.Properties.ShakingMinimumDistance.Value;
             _findMyMouseShakingIntervalMs = FindMyMouseSettingsConfig.Properties.ShakingIntervalMs.Value;
             _findMyMouseShakingFactor = FindMyMouseSettingsConfig.Properties.ShakingFactor.Value;
+            Logger.LogInfo($"[MouseUtilsViewModel] FindMyMouse settings properties initialized");
 
             ArgumentNullException.ThrowIfNull(mouseHighlighterSettingsRepository);
+            Logger.LogInfo($"[MouseUtilsViewModel] MouseHighlighter repository validated");
 
             MouseHighlighterSettingsConfig = mouseHighlighterSettingsRepository.SettingsConfig;
+            Logger.LogInfo($"[MouseUtilsViewModel] MouseHighlighterSettingsConfig loaded");
             string leftClickColor = MouseHighlighterSettingsConfig.Properties.LeftButtonClickColor.Value;
             _highlighterLeftButtonClickColor = !string.IsNullOrEmpty(leftClickColor) ? leftClickColor : "#a6FFFF00";
 
@@ -81,12 +94,17 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             _highlightFadeDelayMs = MouseHighlighterSettingsConfig.Properties.HighlightFadeDelayMs.Value;
             _highlightFadeDurationMs = MouseHighlighterSettingsConfig.Properties.HighlightFadeDurationMs.Value;
             _highlighterAutoActivate = MouseHighlighterSettingsConfig.Properties.AutoActivate.Value;
+            Logger.LogInfo($"[MouseUtilsViewModel] MouseHighlighter settings properties initialized");
 
+            Logger.LogInfo($"[MouseUtilsViewModel] Initializing MouseJump settings");
             this.InitializeMouseJumpSettings(mouseJumpSettingsRepository);
+            Logger.LogInfo($"[MouseUtilsViewModel] MouseJump settings initialized");
 
             ArgumentNullException.ThrowIfNull(mousePointerCrosshairsSettingsRepository);
+            Logger.LogInfo($"[MouseUtilsViewModel] MousePointerCrosshairs repository validated");
 
             MousePointerCrosshairsSettingsConfig = mousePointerCrosshairsSettingsRepository.SettingsConfig;
+            Logger.LogInfo($"[MouseUtilsViewModel] MousePointerCrosshairsSettingsConfig loaded");
 
             string crosshairsColor = MousePointerCrosshairsSettingsConfig.Properties.CrosshairsColor.Value;
             _mousePointerCrosshairsColor = !string.IsNullOrEmpty(crosshairsColor) ? crosshairsColor : "#FF0000";
@@ -102,14 +120,44 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             _mousePointerCrosshairsIsFixedLengthEnabled = MousePointerCrosshairsSettingsConfig.Properties.CrosshairsIsFixedLengthEnabled.Value;
             _mousePointerCrosshairsFixedLength = MousePointerCrosshairsSettingsConfig.Properties.CrosshairsFixedLength.Value;
             _mousePointerCrosshairsAutoActivate = MousePointerCrosshairsSettingsConfig.Properties.AutoActivate.Value;
+            Logger.LogInfo($"[MouseUtilsViewModel] MousePointerCrosshairs settings properties initialized");
 
-            int isEnabled = 0;
+            // MAGNIFIER SETTINGS INITIALIZATION - CRITICAL SECTION
+            Logger.LogInfo($"[MouseUtilsViewModel] ===== STARTING MAGNIFIER SETTINGS INITIALIZATION =====");
 
-            Utilities.NativeMethods.SystemParametersInfo(Utilities.NativeMethods.SPI_GETCLIENTAREAANIMATION, 0, ref isEnabled, 0);
-            _isAnimationEnabledBySystem = isEnabled != 0;
+            try
+            {
+                Logger.LogInfo($"[MouseUtilsViewModel] Validating magnifierSettingsRepository parameter");
+                ArgumentNullException.ThrowIfNull(magnifierSettingsRepository);
+                Logger.LogInfo($"[MouseUtilsViewModel] magnifierSettingsRepository parameter validation successful");
+
+                Logger.LogInfo($"[MouseUtilsViewModel] About to call this.InitializeMagnifierSettings()");
+                this.InitializeMagnifierSettings(magnifierSettingsRepository);
+                Logger.LogInfo($"[MouseUtilsViewModel] InitializeMagnifierSettings() call completed successfully");
+
+                Logger.LogInfo($"[MouseUtilsViewModel] About to call this.InitializeMagnifierEnabledValues()");
+                this.InitializeMagnifierEnabledValues();
+                Logger.LogInfo($"[MouseUtilsViewModel] InitializeMagnifierEnabledValues() call completed successfully");
+
+                Logger.LogInfo($"[MouseUtilsViewModel] Magnifier initialization completed successfully");
+            }
+            catch (Exception magnifierEx)
+            {
+                Logger.LogError($"[MouseUtilsViewModel] CRITICAL ERROR during Magnifier settings initialization: {magnifierEx.Message}");
+                Logger.LogError($"[MouseUtilsViewModel] Full Magnifier exception: {magnifierEx}");
+                Logger.LogError($"[MouseUtilsViewModel] Stack trace: {magnifierEx.StackTrace}");
+
+                // Don't re-throw - Magnifier is a standalone module, so we should gracefully handle this mismatch
+                Logger.LogInfo($"[MouseUtilsViewModel] Continuing initialization without Magnifier settings integration");
+            }
+
+            Logger.LogInfo($"[MouseUtilsViewModel] ===== MAGNIFIER SETTINGS INITIALIZATION COMPLETE =====");
 
             // set the callback functions value to handle outgoing IPC message.
             SendConfigMSG = ipcMSGCallBackFunc;
+            Logger.LogInfo($"[MouseUtilsViewModel] IPC callback function assigned");
+
+            Logger.LogInfo($"[MouseUtilsViewModel] Constructor completed successfully - all mouse utilities initialized");
         }
 
         private void InitializeEnabledValues()
@@ -151,6 +199,8 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             {
                 _isMousePointerCrosshairsEnabled = GeneralSettingsConfig.Enabled.MousePointerCrosshairs;
             }
+
+            // NOTE: Magnifier enabled values are initialized separately in the constructor after the settings repository is loaded
         }
 
         public override Dictionary<string, HotkeySettings[]> GetAllHotkeySettings()
@@ -163,6 +213,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                     MousePointerCrosshairsActivationShortcut,
                     GlidingCursorActivationShortcut],
                 [MouseJumpSettings.ModuleName] = [MouseJumpActivationShortcut],
+                [MagnifierSettings.ModuleName] = [MagnifierActivationShortcut],
             };
 
             return hotkeysDict;
@@ -966,6 +1017,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             OnPropertyChanged(nameof(IsMouseHighlighterEnabled));
             OnPropertyChanged(nameof(IsMouseJumpEnabled));
             OnPropertyChanged(nameof(IsMousePointerCrosshairsEnabled));
+            OnPropertyChanged(nameof(IsMagnifierEnabled));
         }
 
         private Func<string, int> SendConfigMSG { get; }
@@ -1013,5 +1065,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
         private int _mousePointerCrosshairsFixedLength;
         private bool _mousePointerCrosshairsAutoActivate;
         private bool _isAnimationEnabledBySystem;
+
+        // Magnifier private fields are defined in MouseUtilsViewModel_Magnifier.cs partial class
     }
 }

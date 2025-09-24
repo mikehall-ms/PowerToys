@@ -169,7 +169,7 @@
                         Severity="Informational"
                         Visibility="{x:Bind ViewModel.IsAnimationEnabledBySystem, Mode=OneWay, Converter={StaticResource ReverseBoolToVisibilityConverter}}">
                         <InfoBar.ActionButton>
-                            <HyperlinkButton x:Uid="OpenSettings" Click="OpenAnimationsSettings_Click" />
+                            <HyperlinkButton x:Uid="OpenAnimationsSettings" Click="OpenAnimationsSettings_Click" />
                         </InfoBar.ActionButton>
                     </InfoBar>
                     <tkcontrols:SettingsExpander
@@ -402,6 +402,49 @@
                                     Maximum="60"
                                     Minimum="5"
                                     Value="{x:Bind ViewModel.GlidingCursorDelaySpeed, Mode=TwoWay}" />
+                            </tkcontrols:SettingsCard>
+                        </tkcontrols:SettingsExpander.Items>
+                    </tkcontrols:SettingsExpander>
+                </controls:SettingsGroup>
+
+                <controls:SettingsGroup x:Uid="MouseUtils_Magnifier" AutomationProperties.AutomationId="MouseUtils_MagnifierTestId">
+                    <controls:GPOInfoControl ShowWarning="{x:Bind ViewModel.IsMagnifierEnabledGpoConfigured, Mode=OneWay}">
+                        <tkcontrols:SettingsCard
+                            Name="MouseUtilsEnableMagnifier"
+                            x:Uid="MouseUtils_Enable_Magnifier"
+                            HeaderIcon="{ui:BitmapIcon Source=/Assets/Settings/Icons/Magnifier.png}">
+                            <ToggleSwitch
+                                x:Uid="ToggleSwitch"
+                                AutomationProperties.AutomationId="MouseUtils_MagnifierToggleId"
+                                IsOn="{x:Bind ViewModel.IsMagnifierEnabled, Mode=TwoWay}" />
+                        </tkcontrols:SettingsCard>
+                    </controls:GPOInfoControl>
+
+                    <tkcontrols:SettingsExpander
+                        Name="MouseUtilsMagnifierActivationShortcut"
+                        x:Uid="MouseUtils_Magnifier_ActivationShortcut"
+                        AutomationProperties.AutomationId="MouseUtils_MagnifierActivationShortcutId"
+                        HeaderIcon="{ui:FontIcon Glyph=&#xEDA7;}"
+                        IsEnabled="{x:Bind ViewModel.IsMagnifierEnabled, Mode=OneWay}"
+                        IsExpanded="True">
+                        <controls:ShortcutControl MinWidth="{StaticResource SettingActionControlMinWidth}" HotkeySettings="{x:Bind Path=ViewModel.MagnifierActivationShortcut, Mode=TwoWay}" />
+                    </tkcontrols:SettingsExpander>
+
+                    <tkcontrols:SettingsExpander
+                        Name="MagnifierAppearanceBehavior"
+                        x:Uid="Appearance_Behavior"
+                        AutomationProperties.AutomationId="MouseUtils_MagnifierAppearanceBehaviorId"
+                        HeaderIcon="{ui:FontIcon Glyph=&#xEB3C;}"
+                        IsEnabled="{x:Bind ViewModel.IsMagnifierEnabled, Mode=OneWay}">
+                        <tkcontrols:SettingsExpander.Items>
+                            <tkcontrols:SettingsCard Name="MouseUtilsMagnifierMagnificationLevel" x:Uid="MouseUtils_Magnifier_MagnificationLevel">
+                                <Slider
+                                    MinWidth="{StaticResource SettingActionControlMinWidth}"
+                                    AutomationProperties.AutomationId="MouseUtils_MagnifierMagnificationLevelId"
+                                    Maximum="5.0"
+                                    Minimum="1.5"
+                                    StepFrequency="0.1"
+                                    Value="{x:Bind ViewModel.MagnifierMagnificationLevel, Mode=TwoWay}" />
                             </tkcontrols:SettingsCard>
                         </tkcontrols:SettingsExpander.Items>
                     </tkcontrols:SettingsExpander>

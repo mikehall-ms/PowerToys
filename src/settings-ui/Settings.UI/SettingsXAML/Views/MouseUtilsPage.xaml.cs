@@ -42,13 +42,12 @@ namespace Microsoft.PowerToys.Settings.UI.Views
                 SettingsRepository<MouseHighlighterSettings>.GetInstance(settingsUtils),
                 SettingsRepository<MouseJumpSettings>.GetInstance(settingsUtils),
                 SettingsRepository<MousePointerCrosshairsSettings>.GetInstance(settingsUtils),
+                SettingsRepository<MagnifierSettings>.GetInstance(settingsUtils),
                 ShellPage.SendDefaultIPCMessage);
 
             DataContext = ViewModel;
             InitializeComponent();
-
             this.MouseUtils_MouseJump_Panel.ViewModel = ViewModel;
-
             Loaded += (s, e) => ViewModel.OnPageLoaded();
         }
 

@@ -805,6 +805,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.CmdPal.Ext.WebSea
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.CmdPal.Ext.Shell.UnitTests", "src\modules\cmdpal\Tests\Microsoft.CmdPal.Ext.Shell.UnitTests\Microsoft.CmdPal.Ext.Shell.UnitTests.csproj", "{E816D7B4-4688-4ECB-97CC-3D8E798F3833}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Magnifier", "src\modules\MouseUtils\Magnifier\Magnifier.vcxproj", "{A2C7FB26-8E65-4B78-9C9F-7A3B8C4D6E2F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|ARM64 = Debug|ARM64
@@ -2923,6 +2925,14 @@ Global
 		{E816D7B4-4688-4ECB-97CC-3D8E798F3833}.Release|ARM64.Build.0 = Release|ARM64
 		{E816D7B4-4688-4ECB-97CC-3D8E798F3833}.Release|x64.ActiveCfg = Release|x64
 		{E816D7B4-4688-4ECB-97CC-3D8E798F3833}.Release|x64.Build.0 = Release|x64
+		{A2C7FB26-8E65-4B78-9C9F-7A3B8C4D6E2F}.Debug|ARM64.ActiveCfg = Debug|ARM64
+		{A2C7FB26-8E65-4B78-9C9F-7A3B8C4D6E2F}.Debug|ARM64.Build.0 = Debug|ARM64
+		{A2C7FB26-8E65-4B78-9C9F-7A3B8C4D6E2F}.Debug|x64.ActiveCfg = Debug|x64
+		{A2C7FB26-8E65-4B78-9C9F-7A3B8C4D6E2F}.Debug|x64.Build.0 = Debug|x64
+		{A2C7FB26-8E65-4B78-9C9F-7A3B8C4D6E2F}.Release|ARM64.ActiveCfg = Release|ARM64
+		{A2C7FB26-8E65-4B78-9C9F-7A3B8C4D6E2F}.Release|ARM64.Build.0 = Release|ARM64
+		{A2C7FB26-8E65-4B78-9C9F-7A3B8C4D6E2F}.Release|x64.ActiveCfg = Release|x64
+		{A2C7FB26-8E65-4B78-9C9F-7A3B8C4D6E2F}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -3242,6 +3252,7 @@ Global
 		{E816D7B3-4688-4ECB-97CC-3D8E798F3832} = {8EF25507-2575-4ADE-BF7E-D23376903AB8}
 		{E816D7B2-4688-4ECB-97CC-3D8E798F3831} = {8EF25507-2575-4ADE-BF7E-D23376903AB8}
 		{E816D7B4-4688-4ECB-97CC-3D8E798F3833} = {8EF25507-2575-4ADE-BF7E-D23376903AB8}
+		{A2C7FB26-8E65-4B78-9C9F-7A3B8C4D6E2F} = {322566EF-20DC-43A6-B9F8-616AF942579A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C3A2F9D1-7930-4EF4-A6FC-7EE0A99821D0}

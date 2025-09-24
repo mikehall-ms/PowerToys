@@ -66,7 +66,8 @@ namespace Microsoft.PowerToys.Settings.UI.Library
             // If the file needs to be modified, to save the new configurations accordingly.
             if (deserializedSettings.UpgradeSettingsConfiguration())
             {
-                SaveSettings(deserializedSettings.ToJsonString(), powertoy, fileName);
+                var upgradedJson = deserializedSettings.ToJsonString();
+                SaveSettings(upgradedJson, powertoy, fileName);
             }
 
             return deserializedSettings;
@@ -82,7 +83,8 @@ namespace Microsoft.PowerToys.Settings.UI.Library
         {
             try
             {
-                return GetSettings<T>(powertoy, fileName);
+                var result = GetSettings<T>(powertoy, fileName);
+                return result;
             }
 
             // Catch json deserialization exceptions when the file is corrupt and has an invalid json.
@@ -159,37 +161,93 @@ namespace Microsoft.PowerToys.Settings.UI.Library
         // Given the powerToy folder name and filename to be accessed, this function deserializes and returns the file.
         private T GetFile<T>(string powertoyFolderName = DefaultModuleName, string fileName = DefaultFileName)
         {
-            // Adding Trim('\0') to overcome possible NTFS file corruption.
-            // Look at issue https://github.com/microsoft/PowerToys/issues/6413 you'll see the file has a large sum of \0 to fill up a 4096 byte buffer for writing to disk
-            // This, while not totally ideal, does work around the problem by trimming the end.
-            // The file itself did write the content correctly but something is off with the actual end of the file, hence the 0x00 bug
-            var jsonSettingsString = _file.ReadAllText(_settingsPath.GetSettingsPath(powertoyFolderName, fileName)).Trim('\0');
+            Logger.LogInfo($"[SettingsUtils] GetFile<{typeof(T).Name}> starting: powertoy='{powertoyFolderName}', fileName='{fileName}'");
 
-            var options = _serializerOptions;
-            return JsonSerializer.Deserialize<T>(jsonSettingsString, options);
+            try
+            {
+                var fullPath = _settingsPath.GetSettingsPath(powertoyFolderName, fileName);
+                Logger.LogInfo($"[SettingsUtils] GetFile: Full path resolved to '{fullPath}'");
+
+                // Adding Trim('\0') to overcome possible NTFS file corruption.
+                // Look at issue https://github.com/microsoft/PowerToys/issues/6413 you'll see the file has a large sum of \0 to fill up a 4096 byte buffer for writing to disk
+                // This, while not totally ideal, does work around the problem by trimming the end.
+                // The file itself did write the content correctly but something is off with the actual end of the file, hence the 0x00 bug
+                Logger.LogInfo($"[SettingsUtils] GetFile: Reading file content from '{fullPath}'");
+                var jsonSettingsString = _file.ReadAllText(fullPath).Trim('\0');
+                Logger.LogInfo($"[SettingsUtils] GetFile: File content read, length={jsonSettingsString.Length} chars, first 100 chars: '{(jsonSettingsString.Length > 100 ? jsonSettingsString.Substring(0, 100) : jsonSettingsString)}'");
+
+                try
+                {
+                    var options = _serializerOptions;
+                    Logger.LogInfo($"[SettingsUtils] GetFile: Attempting JSON deserialization to type {typeof(T).Name}");
+                    Logger.LogInfo($"[SettingsUtils] GetFile: SerializerOptions - MaxDepth={options.MaxDepth}, IncludeFields={options.IncludeFields}");
+
+                    var result = JsonSerializer.Deserialize<T>(jsonSettingsString, options);
+                    Logger.LogInfo($"[SettingsUtils] GetFile: JSON deserialization successful for type {typeof(T).Name}");
+                    return result;
+                }
+                catch (JsonException jsonEx)
+                {
+                    Logger.LogError($"[SettingsUtils] GetFile: JSON deserialization failed for type {typeof(T).Name}: {jsonEx.Message}");
+                    Logger.LogError($"[SettingsUtils] GetFile: JSON content causing error: '{jsonSettingsString}'");
+                    throw;
+                }
+                catch (Exception innerEx)
+                {
+                    Logger.LogError($"[SettingsUtils] GetFile: Unexpected deserialization error for type {typeof(T).Name}: {innerEx.Message}");
+                    Logger.LogError($"[SettingsUtils] GetFile: JSON content: '{jsonSettingsString}'");
+                    throw;
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"[SettingsUtils] GetFile: Exception in GetFile<{typeof(T).Name}> for '{powertoyFolderName}'/'{fileName}': {ex.Message}");
+                Logger.LogError($"[SettingsUtils] GetFile: Exception details: {ex}");
+                throw;
+            }
         }
 
         // Save settings to a json file.
         public void SaveSettings(string jsonSettings, string powertoy = DefaultModuleName, string fileName = DefaultFileName)
         {
+            Logger.LogInfo($"[SettingsUtils] SaveSettings starting: powertoy='{powertoy}', fileName='{fileName}', jsonLength={jsonSettings?.Length ?? 0}");
+
             try
             {
                 if (jsonSettings != null)
                 {
+                    Logger.LogInfo($"[SettingsUtils] SaveSettings: Checking if settings folder exists for '{powertoy}'");
                     if (!_settingsPath.SettingsFolderExists(powertoy))
                     {
+                        Logger.LogInfo($"[SettingsUtils] SaveSettings: Settings folder does not exist, creating for '{powertoy}'");
                         _settingsPath.CreateSettingsFolder(powertoy);
+                        Logger.LogInfo($"[SettingsUtils] SaveSettings: Successfully created settings folder for '{powertoy}'");
+                    }
+                    else
+                    {
+                        Logger.LogInfo($"[SettingsUtils] SaveSettings: Settings folder already exists for '{powertoy}'");
                     }
 
-                    _file.WriteAllText(_settingsPath.GetSettingsPath(powertoy, fileName), jsonSettings);
+                    var targetPath = _settingsPath.GetSettingsPath(powertoy, fileName);
+                    Logger.LogInfo($"[SettingsUtils] SaveSettings: Writing settings to file '{targetPath}'");
+                    Logger.LogInfo($"[SettingsUtils] SaveSettings: JSON content preview (first 200 chars): '{(jsonSettings.Length > 200 ? jsonSettings.Substring(0, 200) : jsonSettings)}'");
+
+                    _file.WriteAllText(targetPath, jsonSettings);
+                    Logger.LogInfo($"[SettingsUtils] SaveSettings: Successfully wrote settings to '{targetPath}'");
+                }
+                else
+                {
+                    Logger.LogWarning($"[SettingsUtils] SaveSettings: jsonSettings is null, skipping save for {powertoy}/{fileName}");
                 }
             }
             catch (Exception e)
             {
-                Logger.LogError($"Exception encountered while saving {powertoy} settings.", e);
+                Logger.LogError($"[SettingsUtils] SaveSettings: Exception encountered while saving {powertoy} settings to {fileName}: {e.Message}", e);
+                Logger.LogError($"[SettingsUtils] SaveSettings: Full exception details: {e}");
 #if DEBUG
                 if (e is ArgumentException || e is ArgumentNullException || e is PathTooLongException)
                 {
+                    Logger.LogError($"[SettingsUtils] SaveSettings: Re-throwing critical exception in DEBUG mode");
                     throw;
                 }
 #endif
