@@ -1,0 +1,79 @@
+﻿<local:NavigablePage
+    x:Class="Microsoft.PowerToys.Settings.UI.Views.PresentationModePage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:Microsoft.PowerToys.Settings.UI.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="using:Microsoft.PowerToys.Settings.UI.Helpers"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:tkcontrols="using:CommunityToolkit.WinUI.Controls"
+    xmlns:ui="using:CommunityToolkit.WinUI"
+    AutomationProperties.LandmarkType="Main"
+    mc:Ignorable="d">
+
+    <controls:SettingsPageControl
+        x:Uid="PresentationMode"
+        IsTabStop="False"
+        ModuleImageSource="ms-appx:///Assets/Settings/Modules/PresentationMode.png">
+        <controls:SettingsPageControl.ModuleContent>
+            <StackPanel ChildrenTransitions="{StaticResource SettingsCardsAnimations}" Orientation="Vertical">
+                <controls:GPOInfoControl ShowWarning="{x:Bind ViewModel.IsEnabledGpoConfigured, Mode=OneWay}">
+                    <tkcontrols:SettingsCard
+                        Name="PresentationModeEnableToggleControlHeaderText"
+                        x:Uid="PresentationMode_EnableToggleControl_HeaderText"
+                        HeaderIcon="{ui:BitmapIcon Source=/Assets/Settings/Icons/PresentationMode.png}">
+                        <ToggleSwitch x:Uid="ToggleSwitch" IsOn="{x:Bind ViewModel.IsEnabled, Mode=TwoWay}" />
+                    </tkcontrols:SettingsCard>
+                </controls:GPOInfoControl>
+
+                <controls:SettingsGroup x:Uid="PresentationMode_BehaviorSettingsGroup" IsEnabled="{x:Bind ViewModel.IsEnabled, Mode=OneWay}">
+                    <tkcontrols:SettingsCard x:Uid="PresentationMode_MonitorSelection" HeaderIcon="{ui:FontIcon Glyph=&#xE7F4;}">
+                        <ComboBox
+                            MinWidth="{StaticResource SettingActionControlMinWidth}"
+                            DisplayMemberPath="DisplayName"
+                            ItemsSource="{x:Bind ViewModel.Monitors, Mode=OneWay}"
+                            SelectedItem="{x:Bind ViewModel.SelectedMonitor, Mode=TwoWay}" />
+                    </tkcontrols:SettingsCard>
+                    <tkcontrols:SettingsCard x:Uid="PresentationMode_RoutingMode" HeaderIcon="{ui:FontIcon Glyph=&#xE78B;}">
+                        <ComboBox MinWidth="{StaticResource SettingActionControlMinWidth}" SelectedIndex="{x:Bind ViewModel.RoutingMode, Mode=TwoWay}">
+                            <ComboBoxItem x:Uid="PresentationMode_RoutingMode_Away" />
+                            <ComboBoxItem x:Uid="PresentationMode_RoutingMode_To" />
+                        </ComboBox>
+                    </tkcontrols:SettingsCard>
+                    <tkcontrols:SettingsCard x:Uid="PresentationMode_ActivationShortcut" HeaderIcon="{ui:FontIcon Glyph=&#xEDA7;}">
+                        <controls:ShortcutControl MinWidth="{StaticResource SettingActionControlMinWidth}" HotkeySettings="{x:Bind Path=ViewModel.ActivationShortcut, Mode=TwoWay}" />
+                    </tkcontrols:SettingsCard>
+                    <tkcontrols:SettingsCard x:Uid="PresentationMode_ToggleNow" HeaderIcon="{ui:FontIcon Glyph=&#xE7E8;}">
+                        <Button x:Uid="PresentationMode_ToggleNow_Button" Click="ToggleNowButton_Click" />
+                    </tkcontrols:SettingsCard>
+                </controls:SettingsGroup>
+
+                <controls:SettingsGroup x:Uid="PresentationMode_ExcludedAppsGroup" IsEnabled="{x:Bind ViewModel.IsEnabled, Mode=OneWay}">
+                    <tkcontrols:SettingsExpander
+                        Name="PresentationModeExcludeApps"
+                        x:Uid="PresentationMode_ExcludeApps"
+                        HeaderIcon="{ui:FontIcon Glyph=&#xECE4;}"
+                        IsExpanded="True">
+                        <tkcontrols:SettingsExpander.Items>
+                            <tkcontrols:SettingsCard
+                                Name="PresentationModeExcludeAppsTextBoxControl"
+                                HorizontalContentAlignment="Stretch"
+                                ContentAlignment="Vertical">
+                                <TextBox
+                                    x:Uid="PresentationMode_ExcludeApps_TextBoxControl"
+                                    MinWidth="240"
+                                    MinHeight="160"
+                                    AcceptsReturn="True"
+                                    ScrollViewer.IsVerticalRailEnabled="True"
+                                    ScrollViewer.VerticalScrollBarVisibility="Visible"
+                                    ScrollViewer.VerticalScrollMode="Enabled"
+                                    Text="{x:Bind ViewModel.ExcludedApps, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    TextWrapping="Wrap" />
+                            </tkcontrols:SettingsCard>
+                        </tkcontrols:SettingsExpander.Items>
+                    </tkcontrols:SettingsExpander>
+                </controls:SettingsGroup>
+            </StackPanel>
+        </controls:SettingsPageControl.ModuleContent>
+    </controls:SettingsPageControl>
+</local:NavigablePage>

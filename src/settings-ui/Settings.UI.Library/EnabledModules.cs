@@ -580,6 +580,23 @@ namespace Microsoft.PowerToys.Settings.UI.Library
             }
         }
 
+        private bool presentationMode; // defaulting to off
+
+        [JsonPropertyName("PresentationMode")]
+        public bool PresentationMode
+        {
+            get => presentationMode;
+            set
+            {
+                if (presentationMode != value)
+                {
+                    LogTelemetryEvent(value);
+                    presentationMode = value;
+                    NotifyChange();
+                }
+            }
+        }
+
         private void NotifyChange()
         {
             notifyEnabledChangedAction?.Invoke();

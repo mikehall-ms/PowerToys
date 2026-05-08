@@ -289,6 +289,12 @@
                             </NavigationViewItem.InfoBadge>
                         </NavigationViewItem>
                         <NavigationViewItem
+                            x:Name="PresentationModeNavigationItem"
+                            x:Uid="Shell_PresentationMode"
+                            helpers:NavHelper.NavigateTo="views:PresentationModePage"
+                            AutomationProperties.AutomationId="PresentationModeNavItem"
+                            Icon="{ui:BitmapIcon Source=/Assets/Settings/Icons/PresentationMode.png}" />
+                        <NavigationViewItem
                             x:Name="WorkspacesNavigationItem"
                             x:Uid="Shell_Workspaces"
                             helpers:NavHelper.NavigateTo="views:WorkspacesPage"

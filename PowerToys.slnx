@@ -821,6 +821,13 @@
       <Platform Solution="*|x64" Project="x64" />
     </Project>
   </Folder>
+  <Folder Name="/modules/PresentationMode/">
+    <Project Path="src/modules/PresentationMode/PresentationModeLib/PresentationModeLib.vcxproj" Id="b2c3d4e5-2345-6789-abcd-ef0123456789" />
+    <Project Path="src/modules/PresentationMode/PresentationModeModuleInterface/PresentationModeModuleInterface.vcxproj" Id="a1b2c3d4-1234-5678-9abc-def012345678" />
+  </Folder>
+  <Folder Name="/modules/PresentationMode/Tests/">
+    <Project Path="src/modules/PresentationMode/PresentationModeModule.UnitTests/PresentationModeModule.UnitTests.vcxproj" Id="c3d4e5f6-3456-789a-bcde-f01234567890" />
+  </Folder>
   <Folder Name="/modules/powerrename/">
     <Project Path="src/modules/powerrename/dll/PowerRenameExt.vcxproj" Id="b25ac7a5-fb9f-4789-b392-d5c85e948670">
       <BuildDependency Project="src/modules/powerrename/lib/PowerRenameLib.vcxproj" />

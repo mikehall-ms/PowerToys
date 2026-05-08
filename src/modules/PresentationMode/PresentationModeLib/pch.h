@@ -1,0 +1,13 @@
+#pragma once
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include <atomic>
+#include <condition_variable>
+#include <functional>
+#include <memory>
+#include <mutex>
+#include <shared_mutex>
+#include <string>
+#include <thread>
+#include <unordered_set>
+#include <vector>

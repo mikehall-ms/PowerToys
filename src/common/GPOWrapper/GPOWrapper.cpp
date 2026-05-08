@@ -40,6 +40,10 @@ namespace winrt::PowerToys::GPOWrapper::implementation
     {
         return static_cast<GpoRuleConfigured>(powertoys_gpo::getConfiguredGrabAndMoveEnabledValue());
     }
+    GpoRuleConfigured GPOWrapper::GetConfiguredPresentationModeEnabledValue()
+    {
+        return static_cast<GpoRuleConfigured>(powertoys_gpo::getConfiguredPresentationModeEnabledValue());
+    }
     GpoRuleConfigured GPOWrapper::GetConfiguredFancyZonesEnabledValue()
     {
         return static_cast<GpoRuleConfigured>(powertoys_gpo::getConfiguredFancyZonesEnabledValue());

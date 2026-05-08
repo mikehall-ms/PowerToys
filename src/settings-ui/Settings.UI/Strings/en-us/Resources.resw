@@ -6013,4 +6013,69 @@ Text uses the current drawing color.</value>
     <value>Example: outlook.exe</value>
     <comment>{Locked="outlook.exe"}</comment>
   </data>
+  <data name="Shell_PresentationMode.Content" xml:space="preserve">
+    <value>Presentation Mode</value>
+    <comment>"Presentation Mode" is the name of the utility</comment>
+  </data>
+  <data name="PresentationMode.ModuleTitle" xml:space="preserve">
+    <value>Presentation Mode</value>
+  </data>
+  <data name="PresentationMode_EnableToggleControl_HeaderText.Header" xml:space="preserve">
+    <value>Presentation Mode</value>
+    <comment>"Presentation Mode" is the name of the utility</comment>
+  </data>
+  <data name="LearnMore_PresentationMode.Text" xml:space="preserve">
+    <value>Learn more about Presentation Mode</value>
+  </data>
+  <data name="PresentationMode.ModuleDescription" xml:space="preserve">
+    <value>Route newly-opened windows to or away from a designated presentation monitor.</value>
+  </data>
+  <data name="PresentationMode_BehaviorSettingsGroup.Header" xml:space="preserve">
+    <value>Behavior</value>
+  </data>
+  <data name="PresentationMode_RoutingMode.Header" xml:space="preserve">
+    <value>Window routing mode</value>
+  </data>
+  <data name="PresentationMode_RoutingMode.Description" xml:space="preserve">
+    <value>Choose whether newly launched windows are moved away from or to the presentation monitor.</value>
+  </data>
+  <data name="PresentationMode_MonitorSelection.Header" xml:space="preserve">
+    <value>Presentation monitor</value>
+  </data>
+  <data name="PresentationMode_MonitorSelection.Description" xml:space="preserve">
+    <value>Select the monitor to use for presentations. The list updates automatically when monitors are connected or disconnected.</value>
+  </data>
+  <data name="PresentationMode_RoutingMode_Away.Content" xml:space="preserve">
+    <value>Move new windows away from the presentation monitor</value>
+  </data>
+  <data name="PresentationMode_RoutingMode_To.Content" xml:space="preserve">
+    <value>Move new windows to the presentation monitor</value>
+  </data>
+  <data name="PresentationMode_ActivationShortcut.Header" xml:space="preserve">
+    <value>Activation shortcut</value>
+  </data>
+  <data name="PresentationMode_ActivationShortcut.Description" xml:space="preserve">
+    <value>Press the shortcut to toggle the routing mode while Presentation Mode is enabled.</value>
+  </data>
+  <data name="PresentationMode_ToggleNow.Header" xml:space="preserve">
+    <value>Toggle routing mode</value>
+  </data>
+  <data name="PresentationMode_ToggleNow.Description" xml:space="preserve">
+    <value>Switches between routing new windows away from and to the presentation monitor.</value>
+  </data>
+  <data name="PresentationMode_ToggleNow_Button.Content" xml:space="preserve">
+    <value>Toggle now</value>
+  </data>
+  <data name="PresentationMode_ExcludedAppsGroup.Header" xml:space="preserve">
+    <value>Excluded apps</value>
+  </data>
+  <data name="PresentationMode_ExcludeApps.Header" xml:space="preserve">
+    <value>Excluded apps</value>
+  </data>
+  <data name="PresentationMode_ExcludeApps.Description" xml:space="preserve">
+    <value>These apps will be excluded from window routing. Add one app name per line.</value>
+  </data>
+  <data name="PresentationMode_ExcludeApps_TextBoxControl.PlaceholderText" xml:space="preserve">
+    <value>Example: outlook.exe</value>
+  </data>
 </root>
