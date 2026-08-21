@@ -2825,6 +2825,42 @@ From there, simply click on one of the supported files in the File Explorer and 
     <value>Holding Shift</value>
     <comment>CursorWrap: Activation mode - wrap only when Shift held</comment>
   </data>
+  <data name="MouseUtils_RightClickLock.Header" xml:space="preserve">
+    <value>Right Click Lock</value>
+  </data>
+  <data name="MouseUtils_RightClickLock.Description" xml:space="preserve">
+    <value>Hold the right mouse button without keeping it physically pressed</value>
+  </data>
+  <data name="MouseUtils_Enable_RightClickLock.Header" xml:space="preserve">
+    <value>Enable Right Click Lock</value>
+  </data>
+  <data name="MouseUtils_RightClickLock_ActivationShortcut.Header" xml:space="preserve">
+    <value>Activation shortcut</value>
+  </data>
+  <data name="MouseUtils_RightClickLock_ActivationShortcut.Description" xml:space="preserve">
+    <value>Toggles the right-click lock feature on or off</value>
+  </data>
+  <data name="MouseUtils_RightClickLock_PanicShortcut.Header" xml:space="preserve">
+    <value>Emergency release shortcut</value>
+  </data>
+  <data name="MouseUtils_RightClickLock_PanicShortcut.Description" xml:space="preserve">
+    <value>Immediately releases a held right mouse button</value>
+  </data>
+  <data name="MouseUtils_RightClickLock_AutoActivateInGameMode.Content" xml:space="preserve">
+    <value>Automatically activate while a full-screen game is running</value>
+  </data>
+  <data name="MouseUtils_RightClickLock_HoldDelay.Header" xml:space="preserve">
+    <value>Hold duration (ms)</value>
+  </data>
+  <data name="MouseUtils_RightClickLock_HoldDelay.Description" xml:space="preserve">
+    <value>How long to hold the right button before the lock engages</value>
+  </data>
+  <data name="MouseUtils_RightClickLock_MoveCancel.Header" xml:space="preserve">
+    <value>Movement cancel threshold (pixels)</value>
+  </data>
+  <data name="MouseUtils_RightClickLock_MoveCancel.Description" xml:space="preserve">
+    <value>Cancel arming if the cursor moves more than this many pixels while holding</value>
+  </data>
   <data name="Oobe_MouseUtils_MousePointerCrosshairs.Text" xml:space="preserve">
     <value>Mouse Pointer Crosshairs</value>
     <comment>Mouse as in the hardware peripheral.</comment>

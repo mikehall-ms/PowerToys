@@ -545,6 +545,22 @@ namespace Microsoft.PowerToys.Settings.UI.Library
             }
         }
 
+        private bool rightClickLock; // defaulting to off
+
+        [JsonPropertyName("RightClickLock")]
+        public bool RightClickLock
+        {
+            get => rightClickLock;
+            set
+            {
+                if (rightClickLock != value)
+                {
+                    LogTelemetryEvent(value);
+                    rightClickLock = value;
+                }
+            }
+        }
+
         private bool lightSwitch;
 
         [JsonPropertyName("LightSwitch")]

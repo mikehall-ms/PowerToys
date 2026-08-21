@@ -31,7 +31,9 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
         private CursorWrapSettings CursorWrapSettingsConfig { get; set; }
 
-        public MouseUtilsViewModel(SettingsUtils settingsUtils, ISettingsRepository<GeneralSettings> settingsRepository, ISettingsRepository<FindMyMouseSettings> findMyMouseSettingsRepository, ISettingsRepository<MouseHighlighterSettings> mouseHighlighterSettingsRepository, ISettingsRepository<MouseJumpSettings> mouseJumpSettingsRepository, ISettingsRepository<MousePointerCrosshairsSettings> mousePointerCrosshairsSettingsRepository, ISettingsRepository<CursorWrapSettings> cursorWrapSettingsRepository, Func<string, int> ipcMSGCallBackFunc)
+        private RightClickLockSettings RightClickLockSettingsConfig { get; set; }
+
+        public MouseUtilsViewModel(SettingsUtils settingsUtils, ISettingsRepository<GeneralSettings> settingsRepository, ISettingsRepository<FindMyMouseSettings> findMyMouseSettingsRepository, ISettingsRepository<MouseHighlighterSettings> mouseHighlighterSettingsRepository, ISettingsRepository<MouseJumpSettings> mouseJumpSettingsRepository, ISettingsRepository<MousePointerCrosshairsSettings> mousePointerCrosshairsSettingsRepository, ISettingsRepository<CursorWrapSettings> cursorWrapSettingsRepository, ISettingsRepository<RightClickLockSettings> rightClickLockSettingsRepository, Func<string, int> ipcMSGCallBackFunc)
         {
             SettingsUtils = settingsUtils;
 
@@ -128,6 +130,13 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             // Null-safe access in case property wasn't upgraded yet - default to false
             _cursorWrapDisableOnSingleMonitor = CursorWrapSettingsConfig.Properties.DisableCursorWrapOnSingleMonitor?.Value ?? false;
 
+            ArgumentNullException.ThrowIfNull(rightClickLockSettingsRepository);
+
+            RightClickLockSettingsConfig = rightClickLockSettingsRepository.SettingsConfig;
+            _rightClickLockAutoActivateInGameMode = RightClickLockSettingsConfig.Properties.AutoActivateInGameMode.Value;
+            _rightClickLockHoldDelayMs = RightClickLockSettingsConfig.Properties.HoldDelayMs.Value;
+            _rightClickLockMoveCancelPixels = RightClickLockSettingsConfig.Properties.MoveCancelPixels.Value;
+
             int isEnabled = 0;
 
             Utilities.NativeMethods.SystemParametersInfo(Utilities.NativeMethods.SPI_GETCLIENTAREAANIMATION, 0, ref isEnabled, 0);
@@ -188,6 +197,18 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             {
                 _isCursorWrapEnabled = GeneralSettingsConfig.Enabled.CursorWrap;
             }
+
+            _rightClickLockEnabledGpoRuleConfiguration = GPOWrapper.GetConfiguredRightClickLockEnabledValue();
+            if (_rightClickLockEnabledGpoRuleConfiguration == GpoRuleConfigured.Disabled || _rightClickLockEnabledGpoRuleConfiguration == GpoRuleConfigured.Enabled)
+            {
+                // Get the enabled state from GPO.
+                _rightClickLockEnabledStateIsGPOConfigured = true;
+                _isRightClickLockEnabled = _rightClickLockEnabledGpoRuleConfiguration == GpoRuleConfigured.Enabled;
+            }
+            else
+            {
+                _isRightClickLockEnabled = GeneralSettingsConfig.Enabled.RightClickLock;
+            }
         }
 
         public override Dictionary<string, HotkeySettings[]> GetAllHotkeySettings()
@@ -201,6 +222,9 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
                     GlidingCursorActivationShortcut],
                 [MouseJumpSettings.ModuleName] = [MouseJumpActivationShortcut],
                 [CursorWrapSettings.ModuleName] = [CursorWrapActivationShortcut],
+                [RightClickLockSettings.ModuleName] = [
+                    RightClickLockActivationShortcut,
+                    RightClickLockPanicShortcut],
             };
 
             return hotkeysDict;
@@ -1313,6 +1337,135 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             SettingsUtils.SaveSettings(CursorWrapSettingsConfig.ToJsonString(), CursorWrapSettings.ModuleName);
         }
 
+        public bool IsRightClickLockEnabled
+        {
+            get => _isRightClickLockEnabled;
+            set
+            {
+                if (_rightClickLockEnabledStateIsGPOConfigured)
+                {
+                    // If it's GPO configured, shouldn't be able to change this state.
+                    return;
+                }
+
+                if (_isRightClickLockEnabled != value)
+                {
+                    _isRightClickLockEnabled = value;
+
+                    GeneralSettingsConfig.Enabled.RightClickLock = value;
+                    OnPropertyChanged(nameof(IsRightClickLockEnabled));
+
+                    OutGoingGeneralSettings outgoing = new OutGoingGeneralSettings(GeneralSettingsConfig);
+                    SendConfigMSG(outgoing.ToString());
+
+                    NotifyRightClickLockPropertyChanged();
+                }
+            }
+        }
+
+        public bool IsRightClickLockEnabledGpoConfigured
+        {
+            get => _rightClickLockEnabledStateIsGPOConfigured;
+        }
+
+        public HotkeySettings RightClickLockActivationShortcut
+        {
+            get
+            {
+                return RightClickLockSettingsConfig.Properties.ActivationShortcut;
+            }
+
+            set
+            {
+                if (RightClickLockSettingsConfig.Properties.ActivationShortcut != value)
+                {
+                    RightClickLockSettingsConfig.Properties.ActivationShortcut = value ?? RightClickLockSettingsConfig.Properties.DefaultActivationShortcut;
+                    NotifyRightClickLockPropertyChanged();
+                }
+            }
+        }
+
+        public HotkeySettings RightClickLockPanicShortcut
+        {
+            get
+            {
+                return RightClickLockSettingsConfig.Properties.PanicShortcut;
+            }
+
+            set
+            {
+                if (RightClickLockSettingsConfig.Properties.PanicShortcut != value)
+                {
+                    RightClickLockSettingsConfig.Properties.PanicShortcut = value ?? RightClickLockSettingsConfig.Properties.DefaultPanicShortcut;
+                    NotifyRightClickLockPropertyChanged();
+                }
+            }
+        }
+
+        public bool RightClickLockAutoActivateInGameMode
+        {
+            get
+            {
+                return _rightClickLockAutoActivateInGameMode;
+            }
+
+            set
+            {
+                if (value != _rightClickLockAutoActivateInGameMode)
+                {
+                    _rightClickLockAutoActivateInGameMode = value;
+                    RightClickLockSettingsConfig.Properties.AutoActivateInGameMode.Value = value;
+                    NotifyRightClickLockPropertyChanged();
+                }
+            }
+        }
+
+        public int RightClickLockHoldDelayMs
+        {
+            get
+            {
+                return _rightClickLockHoldDelayMs;
+            }
+
+            set
+            {
+                if (value != _rightClickLockHoldDelayMs)
+                {
+                    _rightClickLockHoldDelayMs = value;
+                    RightClickLockSettingsConfig.Properties.HoldDelayMs.Value = value;
+                    NotifyRightClickLockPropertyChanged();
+                }
+            }
+        }
+
+        public int RightClickLockMoveCancelPixels
+        {
+            get
+            {
+                return _rightClickLockMoveCancelPixels;
+            }
+
+            set
+            {
+                if (value != _rightClickLockMoveCancelPixels)
+                {
+                    _rightClickLockMoveCancelPixels = value;
+                    RightClickLockSettingsConfig.Properties.MoveCancelPixels.Value = value;
+                    NotifyRightClickLockPropertyChanged();
+                }
+            }
+        }
+
+        public void NotifyRightClickLockPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            OnPropertyChanged(propertyName);
+
+            SndRightClickLockSettings outsettings = new SndRightClickLockSettings(RightClickLockSettingsConfig);
+            SndModuleSettings<SndRightClickLockSettings> ipcMessage = new SndModuleSettings<SndRightClickLockSettings>(outsettings);
+            SendConfigMSG(ipcMessage.ToJsonString());
+            SettingsUtils.SaveSettings(RightClickLockSettingsConfig.ToJsonString(), RightClickLockSettings.ModuleName);
+        }
+
         public void RefreshEnabledState()
         {
             InitializeEnabledValues();
@@ -1321,6 +1474,7 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             OnPropertyChanged(nameof(IsMouseJumpEnabled));
             OnPropertyChanged(nameof(IsMousePointerCrosshairsEnabled));
             OnPropertyChanged(nameof(IsCursorWrapEnabled));
+            OnPropertyChanged(nameof(IsRightClickLockEnabled));
         }
 
         private Func<string, int> SendConfigMSG { get; }
@@ -1383,5 +1537,12 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
         private int _cursorWrapWrapMode; // 0=Both, 1=VerticalOnly, 2=HorizontalOnly
         private int _cursorWrapActivationMode; // 0=Always, 1=HoldingCtrl (wraps only while held), 2=HoldingShift (wraps only while held)
         private bool _cursorWrapDisableOnSingleMonitor; // Disable cursor wrap when only one monitor is connected
+
+        private GpoRuleConfigured _rightClickLockEnabledGpoRuleConfiguration;
+        private bool _rightClickLockEnabledStateIsGPOConfigured;
+        private bool _isRightClickLockEnabled;
+        private bool _rightClickLockAutoActivateInGameMode;
+        private int _rightClickLockHoldDelayMs;
+        private int _rightClickLockMoveCancelPixels;
     }
 }
